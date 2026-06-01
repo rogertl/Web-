@@ -1,11 +1,19 @@
 # Claude 相关
 .claude/
 
+# 内部文件（用户在 GitHub 上不需要看到）
+CLAUDE.md
+SYLLABUS.md
+CONCEPTS.md
+REVIEW-REPORT.md
+
 # 日志文件
 logs/
 
-# 审阅报告（内部使用）
-REVIEW-REPORT.md
+# 目录说明
+docs/
+notes/
+practice/
 
 # 编辑器文件
 .vscode/
