@@ -5,9 +5,9 @@ Hooks 是 React 函数组件中处理状态和副作用的特殊函数。
 
 ## 为什么需要它
 
-不理解 Hooks，当看到 AI 代码中组件内部有 `useState`、`useEffect` 等"魔法"调用时，你会完全迷失：这些函数从哪来？为什么组件一渲染就会执行？为什么 `useEffect` 里面可以写异步代码？依赖数组是干什么的？
+不理解 Hooks，当看到 AI 代码中组件内部有 `useState`、`useEffect` 等"魔法"调用时，你会完全迷失：这些函数从哪来？为什么组件一渲染就会执行？为什么 `u[...]
 
-Hooks 是现代 React 开发的核心。不掌握 useState 和 useEffect，就无法理解组件如何响应数据变化、如何处理副作用（API 调用、订阅等）。
+Hooks 是现代 React 开发的核心。不掌握 useState 和 useEffect，就无法理解组件如何响应数据变化、如何��理副作用（API 调用、订阅等）。
 
 ## 类比
 
@@ -287,14 +287,64 @@ function GoodExample() {
 
 为什么？React 依赖 Hooks 的调用顺序来正确关联状态和副作用。违反规则会破坏这个顺序。
 
+---
+
+## 组件完整的渲染生命周期
+
+理解 Hooks 的关键是理解组件的渲染流程。以 `UserProfile` 组件为例：
+
+```
+【第一次渲染】
+1. 函数组件执行
+   ├─ useState(null) → user = null
+   └─ useState(true) → loading = true
+   
+2. 组件渲染到 DOM
+   └─ 页面显示 "Loading..."
+   
+3. 组件已经完全渲染完毕，**现在**才执行 useEffect
+   └─ 开始 fetchUser() 异步操作（不阻塞渲染）
+
+【等待中...】
+用户看到 "Loading..." 几秒钟
+
+【数据到达，状态更新】
+4. fetchUser() 完成，调用 setUser(data)
+   └─ React 触发重新渲染
+
+【第二次渲染】
+5. 函数组件再次执行
+   ├─ useState(null) → user = { name: '张三', email: '...' }
+   └─ useState(true) → loading = false
+   
+6. 组件渲染到 DOM
+   └─ 页面显示用户信息（不再是"Loading..."）
+   
+7. useEffect 检查依赖数组 [userId]
+   └─ userId 没有变化，所以不再执行
+```
+
+**核心点：**
+- ✅ `useState` 初始化状态，状态变化触发重新渲染
+- ✅ `useEffect` 在渲染**之后**执行，用来做数据获取、订阅等副作用
+- ✅ 副作用中的 `setUser()` 会再次触发渲染，形成循环直到数据完全加载
+
+**为什么要这样设计？**
+1. **渲染优先**：先渲染页面骨架（显示 Loading），再去获取数据
+2. **非阻塞**：useEffect 不会延迟页面显示，提升用户体验
+3. **自动同步**：数据到了自动更新状态，状态变化自动重新渲染
+
+---
+
 ## 你需要记住的
 
 - `useState` 返回 `[状态值, 更新函数]`，状态变化触发重新渲染
-- `useEffect` 在渲染后执行副作用（API 调用、订阅等）
+- `useEffect` 在渲染**之后**执行副作用（API 调用、订阅等）
 - useEffect 的依赖数组控制何时重新执行
 - useEffect 可以返回清理函数，用于解除副作用
 - Hooks 必须在函数顶层调用，不能在条件或循环中使用
 - 只在 React 函数组件或自定义 Hook 中调用 Hooks
+- **组件渲染流程**：初始化状态 → 渲染 UI → 执行 useEffect → 数据回来后状态更新 → 重新渲染
 
 ## AI 代码中的线索
 
@@ -327,3 +377,4 @@ const [loading, setLoading] = useState(false);
 - [ ] 为什么 useState 更新状态会触发组件重新渲染？
 - [ ] useEffect 的依赖数组为空 `[]` 和有依赖 `[count]` 有什么区别？
 - [ ] 为什么 Hooks 必须在函数顶层调用，不能在条件语句中使用？
+- [ ] 组件首次渲染到显示 "Loading..."，然后数据到达会经历什么过程？
