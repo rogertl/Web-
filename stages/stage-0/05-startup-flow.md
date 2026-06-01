@@ -15,28 +15,28 @@
 | 你写的代码 | 原材料（生牛肉、面粉） |
 | `npm run dev` | 按下厨房电闸，开始加工 |
 | 构建工具 | 厨师：把原材料加工成菜品 |
-| `localhost:3000` | 出餐窗口，端出来的成品 |
+| `localhost:3000` | 出餐窗口（你电脑上的 3000 号窗口） |
 | HMR | 菜里盐放多了，厨师直接换一份，不用重新点菜 |
 
-## 完整链路
+## 核心内容
+
+### 完整链路
 
 ```
 你在终端输入
     │
     ▼
 npm run dev
-    │
+    │  npm 读取 package.json，找到 scripts.dev 的值："next dev"
     ▼
-读取 package.json 的 scripts.dev → "next dev"
-    │
-    ▼
-执行 next dev（Node.js 进程启动）
+执行 next dev（Node.js 进程启动，0.1 讲过 Node.js 的作用）
     │
     ├── 1. 加载 next.config.js 配置
     ├── 2. 扫描 app/ 目录结构，建立路由表
-    ├── 3. 启动开发服务器（默认 http://localhost:3000）
-    ├── 4. 启用 HMR（文件变化时自动重新编译）
-    └── 5. 编译 TypeScript → JavaScript
+    │      （路由表 = URL 路径和页面文件的对照表，阶段 2 会详细讲）
+    ├── 3. 启动开发服务器，监听本机的 3000 端口
+    ├── 4. 启用 HMR（文件变化时自动重新编译，0.3 讲过原理）
+    └── 5. 编译 TypeScript → JavaScript（0.4 讲过 TS 会被擦除）
     │
     ▼
 浏览器访问 localhost:3000
@@ -44,8 +44,8 @@ npm run dev
     ▼
 服务器收到请求
     │
-    ├── 1. 匹配路由（URL → 对应的 page.tsx）
-    ├── 2. 执行 Server Component 代码
+    ├── 1. 根据路由表匹配 URL → 找到对应的 page.tsx
+    ├── 2. 执行 Server Component 代码（阶段 3 会详细讲）
     ├── 3. 获取数据（如果有数据库查询）
     ├── 4. 渲染 HTML
     └── 5. 发送给浏览器
@@ -55,43 +55,66 @@ npm run dev
     │
     ├── 加载 HTML（页面骨架）
     ├── 加载 CSS（样式）
-    ├── 加载 Client Component JS（交互逻辑）
+    ├── 加载 Client Component 的 JS（交互逻辑，阶段 3 会详细讲）
     └── 页面可交互 ✅
 ```
 
-## 每个环节的关键文件
+### localhost 和端口是什么
 
-| 环节 | 关键文件 | 作用 |
-|------|----------|------|
-| 配置 | `package.json` | 定义 scripts 命令 |
-| 配置 | `next.config.js` | Next.js 自身配置 |
-| 配置 | `tsconfig.json` | TypeScript 编译规则 |
-| 路由 | `app/**/page.tsx` | URL 对应的页面 |
-| 布局 | `app/layout.tsx` | 页面的公共外壳 |
-| 入口 | `app/page.tsx` | 首页（访问 `/` 时显示） |
+- **localhost** = 你自己的电脑（不是互联网上的某台服务器）。浏览器访问 localhost，等于在跟自己电脑上的程序通信
+- **端口（Port）** = 程序的"门牌号"。一台电脑可以运行很多程序，端口用来区分哪个请求发给哪个程序。3000 是 Next.js 的默认端口
 
-## 你改代码后发生了什么
+```
+你的电脑
+├── 端口 3000 → Next.js 开发服务器
+├── 端口 3001 → 另一个项目
+└── 端口 8080 → 数据库（如果有）
+```
+
+### 你改代码后发生了什么
 
 ```
 你修改了 app/page.tsx 并保存
     │
     ▼
-文件系统监听到变化（HMR）
+Next.js 的文件监听检测到变化
     │
     ▼
-Next.js 只重新编译被修改的模块
+只重新编译被修改的模块（不是整个项目）
     │
     ▼
-浏览器通过 WebSocket 收到更新通知
+通过 WebSocket（一种浏览器和服务器之间的实时通信通道）
+通知浏览器
     │
     ▼
-浏览器替换对应模块（不刷新整个页面）
+浏览器只替换变化的模块（不刷新整个页面，保留当前状态）
     │
     ▼
 你立刻看到更新后的效果 ✅
 ```
 
-## 端口号
+### 三个关键命令的区别
+
+| 命令 | 作用 | 什么时候用 |
+|------|------|-----------|
+| `npm run dev` | 启动开发服务器，支持热更新 | 写代码时 |
+| `npm run build` | 编译优化，生成生产版本 | 准备部署时 |
+| `npm run start` | 运行编译后的生产版本 | 部署到服务器后 |
+
+开发时用 `dev`（有热更新，方便调试），部署时用 `build + start`（更快、更安全）。
+
+### 每个环节的关键文件
+
+| 环节 | 关键文件 | 作用 |
+|------|----------|------|
+| 配置 | `package.json` | 定义 scripts 命令（0.2 讲过） |
+| 配置 | `next.config.js` | Next.js 自身配置 |
+| 配置 | `tsconfig.json` | TypeScript 编译规则（0.4 讲过 TS） |
+| 路由 | `app/**/page.tsx` | URL 对应的页面（阶段 2 详细讲） |
+| 布局 | `app/layout.tsx` | 页面的公共外壳（阶段 2 详细讲） |
+| 入口 | `app/page.tsx` | 首页（访问 `/` 时显示） |
+
+### 端口号操作
 
 ```bash
 # 默认端口
@@ -107,20 +130,20 @@ npm run dev -- -p 4000   # → http://localhost:4000
 
 ## 你需要记住的
 
-1. `npm run dev` → 启动开发服务器，支持热更新
-2. `npm run build` → 编译生产版本（更快、更小）
-3. `npm run start` → 运行编译后的生产版本
-4. 开发时用 `dev`，部署时用 `build + start`
+1. `npm run dev` → npm 读 package.json → 找 scripts.dev → 用 Node.js 执行
+2. `localhost` = 你自己的电脑，`3000` = 门牌号（端口）
+3. HMR 的链路：保存文件 → 检测变化 → 编译改动的部分 → WebSocket 通知 → 浏览器替换
+4. 开发用 `dev`，部署用 `build + start`
 
 ## AI 代码中的线索
 
 ```bash
 # AI 生成项目后常给你这些命令
 npm run dev           # 启动开发
-npm run build         # 构建
-npm run start         # 生产运行
+npm run build         # 构建生产版本
+npm run start         # 运行生产版本
 npm run lint          # 代码检查
-pnpm dev              # pnpm 版本
+pnpm dev              # pnpm 版本（等价于 pnpm run dev，0.2 讲过）
 ```
 
 如果启动报错，AI 通常会建议你：
@@ -132,9 +155,7 @@ pnpm install
 
 ## 验证问题
 
-- [ ] `npm run dev` 实际上执行的是什么命令？
-- [ ] 为什么改代码后浏览器会自动更新？
-- [ ] `localhost:3000` 对应的是哪个文件？
-- [ ] `package.json` 中的 `scripts` 字段有什么用？
-
-如果都能回答，阶段 0 就通关了。
+- [ ] `npm run dev` 实际上执行的是什么命令？它是怎么找到要执行的命令的？
+- [ ] `localhost` 是什么？`3000` 是什么？为什么需要端口号？
+- [ ] 你改了代码保存后，浏览器是怎么知道要更新的？（说出完整的链路）
+- [ ] `npm run dev` 和 `npm run build` 有什么区别？各在什么场景下使用？

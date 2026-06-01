@@ -33,6 +33,8 @@ function greet(user: User): string {
 // 传 null → ❌ 编辑器立刻标红：类型不对
 ```
 
+TypeScript 的价值：**在代码运行之前，编辑器就能告诉你哪里写错了**。
+
 ## 类比
 
 | 概念 | 类比 |
@@ -45,7 +47,7 @@ function greet(user: User): string {
 
 没有标签，你只能拆开看有没有被坑。有了标签，拿到手里就知道对不对。
 
-## 三个核心语法
+## 核心内容
 
 ### 1. 类型注解 — 给变量贴标签
 
@@ -61,6 +63,8 @@ function add(a: number, b: number): number {
 }
 ```
 
+**"运行时擦除"是什么意思**：TypeScript 编译后变成 JavaScript，所有类型注解会被移除。`const name: string = 'Tom'` 编译后变成 `const name = 'Tom'`。类型注解只在开发时帮助编辑器检查错误，运行时不存在。
+
 ### 2. interface — 描述对象的形状
 
 ```ts
@@ -68,8 +72,8 @@ interface User {
   id: number
   name: string
   email: string
-  avatar?: string        // ? 表示可选属性
-  role: 'admin' | 'user' // 联合类型：只能是这两个值之一
+  avatar?: string        // ? 表示可选属性（有没有都行）
+  role: 'admin' | 'user' // 联合类型：只能是这两个字符串之一
 }
 
 // 使用
@@ -78,6 +82,7 @@ const user: User = {
   name: 'Tom',
   email: 'tom@example.com',
   role: 'admin'
+  // avatar 不写也行，因为有 ?
 }
 ```
 
@@ -90,53 +95,60 @@ type User = {
   name: string
 }
 
-// type 能做 interface 做不到的事
-type Status = 'active' | 'inactive' | 'banned'
-type ID = number | string            // 可以是数字或字符串
+// type 能做 interface 做不到的事：组合已有类型
+type Status = 'active' | 'inactive' | 'banned'  // 一组可选值
+type ID = number | string                         // 可以是多种类型
 ```
 
-**简单区分**：定义"对象的形状"用 `interface`，定义"一组值的选项"或"类型的组合"用 `type`。AI 两个都会用，你只需要看懂。
+**简单区分**：
+- 定义"对象的形状"（有哪些字段）→ 用 `interface`
+- 定义"一组值的选项"或"类型的组合" → 用 `type`
+- AI 两个都会用，你只需要看懂
 
-## 常见模式（AI 代码中出现频率极高）
+### 常见模式（AI 代码中出现频率极高）
 
 ```ts
-// 1. API 响应类型
-interface ApiResponse<T> {
-  data: T
-  error: string | null
-  status: number
-}
-
-// 2. 组件 Props 类型
+// 1. 组件的 Props 类型（Props 是 React 组件接收参数的方式，阶段 1 会详细讲）
 interface ButtonProps {
   text: string
-  onClick: () => void
+  onClick: () => void           // 一个没有参数、没有返回值的函数
   variant?: 'primary' | 'secondary'
   disabled?: boolean
 }
 
-// 3. 可能为空的值
+// 2. 可能为空的值
 const user: User | null = fetchUser()
-//    ↑ 注意这里：User 或者 null
+//    ↑ User 或者 null（两种可能）
 
-// 4. async 函数返回值
+// 3. async 函数返回值
 async function getUsers(): Promise<User[]> {
-  //                    ↑ 异步函数，最终返回 User 数组
-  const res = await fetch('/api/users')
+  //                    ↑ 异步函数，最终返回一个 User 数组
+  const res = await fetch('/api/users')  // fetch 是浏览器内置的请求函数
   return res.json()
 }
+
+// 4. 泛型 — 让类型也能"接收参数"
+// ApiResponse<T> 中的 T 是一个类型参数，使用时替换成具体类型
+interface ApiResponse<T> {
+  data: T               // T 是占位符，实际类型由使用时决定
+  error: string | null
+  status: number
+}
+// 使用时：ApiResponse<User> → data 的类型就是 User
+// 使用时：ApiResponse<string> → data 的类型就是 string
 ```
 
 ## 你需要记住的
 
-1. `:` 后面的都是类型注解，不是代码逻辑，运行时会被擦除
-2. `interface` 和 `type` 都是描述"数据长什么样"
-3. `?` 表示可选，`|` 表示或者，`[]` 表示数组
-4. 看到 `Promise<X>` → 这是一个异步操作，最终会返回 X
+1. `:` 后面的都是类型注解，运行时会被编译器擦除，不会执行
+2. `interface` 描述"对象有哪些字段"，`type` 描述"一组值的选项"
+3. `?` = 可选，`|` = 或者，`[]` = 数组
+4. `Promise<X>` = 异步操作，最终返回 X
+5. `<T>` = 泛型，让类型也能接收参数，使用时替换成具体类型
 
 ## 读 AI 代码的策略
 
-看到一段 TypeScript 代码，先看类型定义（interface/type），再看逻辑。**类型定义就是最好的文档**。
+看到一段 TypeScript 代码，**先看类型定义（interface/type），再看逻辑**。类型定义就是最好的文档。
 
 ```ts
 // 先看这个 — 你就知道这个函数要什么、返回什么
@@ -157,6 +169,7 @@ async function createPost(
 
 ## 验证问题
 
-- [ ] `const name: string` 中，`string` 会在运行时执行吗？
-- [ ] `interface` 和 `type` 有什么区别？什么时候用哪个？
-- [ ] 看到 `Promise<User[]>` 你能说出这是什么意思吗？
+- [ ] `const name: string` 中的 `string` 会在运行时执行吗？为什么？
+- [ ] `interface` 和 `type` 有什么区别？各适合什么场景？
+- [ ] 看到 `Promise<User[]>` 你能说出这是什么意思吗？`[]` 代表什么？
+- [ ] `ApiResponse<T>` 中的 `T` 是什么？为什么需要它？
