@@ -33,6 +33,18 @@ function greet(user: User): string {
 // 传 null → ❌ 编辑器立刻标红：类型不对
 ```
 
+## 类比
+
+| 概念 | 类比 |
+|------|------|
+| JavaScript | 快递包裹，外面没写是什么东西（拆开才知道） |
+| TypeScript | 快递包裹，外面贴了标签（"易碎品"、"书籍"、"3kg"） |
+| `: string` | 标签上写"这里面是文字" |
+| `interface` | 一张清单，列明包裹里必须有哪些东西 |
+| 编辑器报错 | 快递员检查发现清单和实际内容不符，当场退回 |
+
+没有标签，你只能拆开看有没有被坑。有了标签，拿到手里就知道对不对。
+
 ## 三个核心语法
 
 ### 1. 类型注解 — 给变量贴标签
@@ -81,10 +93,9 @@ type User = {
 // type 能做 interface 做不到的事
 type Status = 'active' | 'inactive' | 'banned'
 type ID = number | string            // 可以是数字或字符串
-type Nullable<T> = T | null          // 泛型工具类型
 ```
 
-**经验法则**：AI 代码中 `interface` 和 `type` 都会出现，功能类似，不用纠结用哪个。
+**简单区分**：定义"对象的形状"用 `interface`，定义"一组值的选项"或"类型的组合"用 `type`。AI 两个都会用，你只需要看懂。
 
 ## 常见模式（AI 代码中出现频率极高）
 
@@ -110,7 +121,7 @@ const user: User | null = fetchUser()
 
 // 4. async 函数返回值
 async function getUsers(): Promise<User[]> {
-  //                    ↑ 异步函数返回 Promise，里面是 User 数组
+  //                    ↑ 异步函数，最终返回 User 数组
   const res = await fetch('/api/users')
   return res.json()
 }
@@ -143,3 +154,9 @@ async function createPost(
   return response.json()
 }
 ```
+
+## 验证问题
+
+- [ ] `const name: string` 中，`string` 会在运行时执行吗？
+- [ ] `interface` 和 `type` 有什么区别？什么时候用哪个？
+- [ ] 看到 `Promise<User[]>` 你能说出这是什么意思吗？

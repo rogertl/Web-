@@ -54,3 +54,9 @@ import fs from 'fs'              // 文件系统，只有 Node.js 有
 import path from 'path'          // 路径处理，只有 Node.js 有
 export async function GET() {}   // Next.js 服务端函数，运行在 Node.js
 ```
+
+## 验证问题
+
+- [ ] Node.js 和浏览器都能运行 JavaScript，它们能做的事情一样吗？
+- [ ] 看到 `import fs from 'fs'` 这行代码，你能判断它运行在哪个环境吗？
+- [ ] 为什么 Next.js 项目必须安装 Node.js？
