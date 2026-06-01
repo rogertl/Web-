@@ -110,14 +110,14 @@
 | Next.js 路由 | 1.5 | 2.1 | 1.5 已标注 | ✅ |
 | Server Component | 1.7 | 3.1 | 1.7 已标注 | ✅ |
 
-## 阶段 2：Next.js 项目结构（待生成）
+## 阶段 2：Next.js 项目结构
 
 | 概念 | 正式讲解 | 首次出现 | 状态 |
 |------|---------|---------|------|
-| App Router | 2.1 | — | ⏳ |
-| layout.tsx / page.tsx | 2.2 | 0.5 | ⏳ |
-| 加载流程 | 2.3 | 0.5 | ⏳ |
-| Next.js vs Vite | 2.4 | 0.3 | ⏳ |
+| App Router | 2.1 | 0.5 | ✅ |
+| layout.tsx / page.tsx | 2.2 | 0.5 | ✅ |
+| 加载流程 | 2.3 | 0.5 | ✅ |
+| Next.js vs Vite | 2.4 | 0.3 | ✅ |
 
 ## 阶段 3：Server Components（待生成）
 
