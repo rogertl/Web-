@@ -8,10 +8,11 @@
 
 ## 概念清单
 
-- [x] [3.1 Server Components（RSC）核心概念](./01-server-components.md)
+- [x] [3.1 Server Components（RSC）核心概念](./01-server-components.md)（包含水合机制）
 - [x] [3.2 Client Components（'use client'）](./02-client-components.md)
 - [x] [3.3 Server Component 与 Client Component 的协作规则](./03-sc-cc-rules.md)
 - [x] [3.4 数据获取在 Server Component 中的写法（async/await）](./04-server-data-fetching.md)
+- [x] [3.5 三种数据获取方式对比](./05-data-fetching-comparison.md)（Server Components await / Client Components useEffect / SWR React Query）
 
 ---
 
@@ -21,6 +22,7 @@
 - [x] [3.2 Client Components（'use client'）](./02-client-components.md)
 - [x] [3.3 Server Component 与 Client Component 的协作规则](./03-sc-cc-rules.md)
 - [x] [3.4 数据获取在 Server Component 中的写法](./04-server-data-fetching.md)
+- [x] [3.5 三种数据获取方式对比](./05-data-fetching-comparison.md)
 
 ---
 

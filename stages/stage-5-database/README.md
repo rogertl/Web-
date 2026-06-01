@@ -8,6 +8,7 @@
 
 ## 概念清单
 
+- [x] 5.0 [数据库基础概念](./00-database-fundamentals.md)（主键、外键、索引、事务、关系类型）
 - [x] 5.1 [数据库连接与 server-only](./01-database-connection-server-only.md)
 - [x] 5.2 [环境变量与配置](./02-environment-variables-configuration.md)
 - [x] 5.3 [Prisma ORM 基础](./03-prisma-orm-basics.md)

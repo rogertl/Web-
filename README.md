@@ -161,19 +161,19 @@ export default function UserList() {
 
 ```
 stages/          # 7 个阶段的教学内容
-  stage-0/       # 环境准备与最基础认知
-    00-basic-concepts.md    # 基础概念预热（命名规范、语法糖）
-    01-nodejs.md             # Node.js 运行时
-    02-package-manager.md    # 包管理器
-    03-vite.md               # 构建工具与 HMR
-    04-typescript.md         # TypeScript 基础
-    05-startup-flow.md       # 项目启动流程
-  stage-1/       # React 基础与组件思维
-  stage-2/       # Next.js 项目结构
-  stage-3/       # Server Components
-  stage-4/       # Server Actions
-  stage-5/       # 数据层与后端逻辑
-  stage-6/       # 架构进阶与生产考虑
+  stage-0-basics/             # 环境准备与最基础认知
+    00-basic-concepts.md      # 基础概念预热（命名规范、语法糖）
+    01-nodejs.md              # Node.js 运行时
+    02-package-manager.md     # 包管理器
+    03-vite.md                # 构建工具与 HMR
+    04-typescript.md          # TypeScript 基础
+    05-startup-flow.md        # 项目启动流程
+  stage-1-react/              # React 基础与组件思维
+  stage-2-nextjs-structure/   # Next.js 项目结构
+  stage-3-server-components/  # Server Components
+  stage-4-server-actions/     # Server Actions
+  stage-5-database/           # 数据层与后端逻辑
+  stage-6-architecture/       # 架构进阶与生产考虑
 SYLLABUS.md      # 教学大纲（7 阶段概念清单）
 CONCEPTS.md      # 全局概念清单（概念闭环检查依据）
 CLAUDE.md        # 项目说明

@@ -3,16 +3,16 @@
 ## 项目结构
 
 ```
-stages/          # 7 个阶段的教学内容
-  stage-0/       # 环境准备与最基础认知
-  stage-1/       # React 基础与组件思维
-  stage-2/       # Next.js 项目结构与加载逻辑
-  stage-3/       # Server Components 与现代渲染模型
-  stage-4/       # 交互与写操作（Server Actions）
-  stage-5/       # 数据层与后端逻辑
-  stage-6/       # 架构进阶与生产考虑
-practice/        # 实践项目（后续创建）
-notes/           # 学习笔记
+stages/                   # 7 个阶段的教学内容
+  stage-0-basics/          # 环境准备与最基础认知
+  stage-1-react/           # React 基础与组件思维
+  stage-2-nextjs-structure/# Next.js 项目结构与加载逻辑
+  stage-3-server-components/# Server Components 与现代渲染模型
+  stage-4-server-actions/  # 交互与写操作（Server Actions）
+  stage-5-database/        # 数据层与后端逻辑
+  stage-6-architecture/    # 架构进阶与生产考虑
+practice/                 # 实践项目（后续创建）
+notes/                    # 学习笔记
 ```
 
 ## 教学流水线 Skill

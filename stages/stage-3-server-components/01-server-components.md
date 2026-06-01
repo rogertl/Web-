@@ -174,6 +174,164 @@ export default function UserCard({ user }: { user: { id: number; name: string } 
 | 访问浏览器 API | ❌ 没有 `window`/`document` | ✅ 可以访问浏览器 API |
 | 使用 React Hooks | ❌ `useState`、`useEffect` 等不能用 | ✅ 可以用所有 Hooks |
 
+### 水合（Hydration）机制
+
+理解水合是理解 Next.js 渲染流程的关键。HTML 返回到浏览器后，React 需要一个"激活"过程，让静态 HTML 变成可交互的应用。
+
+#### 什么是水合
+
+**水合（Hydration）**是 React 在浏览器中"接管"服务端渲染的 HTML 的过程。服务端返回的 HTML 只是静态内容（没有事件监听器），水合就是 React 在浏览器中"唤醒"这些内容，添加交互能力的过程。
+
+#### 水合过程图解
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                      完整渲染流程                                  │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  1. 服务端渲染                         2. 浏览器接收              │
+│  ┌──────────────┐                   ┌──────────────┐            │
+│  │ Server Comp  │ ──渲染──→ HTML  ──→  │ 浏览器显示   │            │
+│  │              │                   │  静态内容     │            │
+│  └──────────────┘                   └──────┬───────┘            │
+│                                          │                     │
+│                                          ↓                     │
+│  3. 浏览器加载 JS                        │                     │
+│  ┌──────────────┐                   ┌──────┴───────┐            │
+│  │ React.js +   │ ──下载──→ 浏览器  │               │            │
+│  │ Client Comp  │                   │  此时：        │            │
+│  └──────────────┘                   │  - HTML 已显示 │            │
+│                                          │  - 但无交互     │            │
+│                                          │  - 点击无效     │            │
+│                                          ↓                │
+│  4. 水合过程                                               │
+│  ┌──────────────────────────────────────────────────────┐    │
+│  │ React"认领"HTML节点：                                   │    │
+│  │ 1. 对比虚拟DOM树和真实DOM                             │    │
+│  │ 2. 为每个节点添加事件监听器                            │    │
+│  │ 3. 恢复组件状态（useState、useEffect）                │    │
+│  │ 4. 应用变为"可交互"                                    │    │
+│  └──────────────────────────────────────────────────────┘    │
+│                                          │                     │
+│                                          ↓                     │
+│  5. 水合完成                                                 │
+│  ┌──────────────┐                                           │
+│  │ 应用完全可用  │ ← 点击、输入等交互正常工作                   │
+│  └──────────────┘                                           │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+#### 关键概念分解
+
+| 步骤 | 发生位置 | 作用 | 状态 |
+|------|---------|------|------|
+| **1. 服务端渲染** | Node.js | 执行 Server Components，生成 HTML | 静态 HTML |
+| **2. 浏览器显示** | 浏览器 | 显示 HTML（无交互能力） | 可见但不可交互 |
+| **3. 加载 JS** | 浏览器 | 下载 React 和 Client Components JS | 仍不可交互 |
+| **4. 水合** | 浏览器 | React 接管 DOM，添加事件监听器 | 正在激活 |
+| **5. 完成** | 浏览器 | 应用完全可交互 | 可交互 |
+
+#### 为什么需要水合
+
+服务端渲染的 HTML 只是"外壳"：
+
+```html
+<!-- 服务端返回的 HTML -->
+<div id="root">
+  <button>点击我</button>
+</div>
+```
+
+这段 HTML 显示了按钮，但**没有点击事件**。水合前，点击无效；水合后，React 为按钮添加 `onClick` 监听器，点击才生效。
+
+#### 为什么 Client Components 需要水合
+
+| 组件类型 | 服务端返回 | 是否需要水合 | 原因 |
+|---------|-----------|-------------|------|
+| Server Component | 只返回渲染后的 HTML | ❌ 不需要 | 代码不发送到浏览器，无需交互 |
+| Client Component | 返回 HTML + JS 代码 | ✅ 需要 | 需要在浏览器中激活事件监听器和状态 |
+
+**关键点**：
+- Server Components 的代码永远不发送到浏览器，所以不需要水合
+- Client Components 的代码会发送到浏览器，需要水合才能交互
+
+#### 水合失败的场景和调试
+
+**场景 1：服务端和客户端 HTML 不匹配**
+
+```typescript
+// 服务端
+export default function UserCard() {
+  const date = new Date();
+  return <div>时间：{date.toLocaleString()}</div>;
+}
+
+// 问题：每次渲染时间都不同，服务端 HTML 和客户端期望的 HTML 不一致
+```
+
+**结果**：控制台警告 `Hydration failed because the initial UI does not match what was rendered on the server`
+
+**解决方案**：
+```typescript
+// 方案 1：只在客户端渲染时间部分
+'use client';
+import { useState, useEffect } from 'react';
+
+export default function TimeDisplay() {
+  const [time, setTime] = useState('');
+
+  useEffect(() => {
+    setTime(new Date().toLocaleString());
+  }, []);
+
+  return <div>时间：{time}</div>;
+}
+
+// 方案 2：使用 suppressHydrationWarning（谨慎使用）
+export default function UserCard() {
+  const date = new Date();
+  return (
+    <div suppressHydrationWarning>
+      时间：{date.toLocaleString()}
+    </div>
+  );
+}
+```
+
+**场景 2：浏览器专属 API 在服务端使用**
+
+```typescript
+// ❌ 错误：服务端没有 window
+export default function WindowWidth() {
+  const width = window.innerWidth; // 报错：window is not defined
+  return <div>宽度：{width}</div>;
+}
+```
+
+**解决方案**：拆成 Client Component（3.2 会详细讲）
+
+**调试水合问题**：
+
+| 问题 | 调试方法 | 解决方案 |
+|------|---------|---------|
+| HTML 不匹配警告 | 检查控制台 `Hydration failed` | 确保服务端和客户端渲染一致 |
+| `window is not defined` | 检查报错堆栈 | 移到 Client Component |
+| 水合后无交互 | 检查是否缺少 `'use client'` | 为需要交互的组件添加指令 |
+
+#### 水合的性能影响
+
+| 因素 | 影响 |
+|------|------|
+| 大量 DOM 节点 | 水合耗时增加（React 需要遍历每个节点） |
+| 复杂 Client Components | JS 体积增加，下载和解析耗时增加 |
+| 水合失败 | 需要 fallback 到客户端渲染，性能大幅下降 |
+
+**最佳实践**：
+- 外层用 Server Components 减少需要水合的内容
+- 内层用 Client Components 只处理必要交互
+- 避免全页面 Client Component 导致大量水合工作
+
 ### Server Components 不是"服务端渲染"的同义词
 
 重要区分：
@@ -181,6 +339,8 @@ export default function UserCard({ user }: { user: { id: number; name: string } 
 - **Server Components**：组件代码完全不发送到浏览器，只在服务端运行
 
 Next.js 13+ 的默认模式：Server Components + SSR。组件在服务端渲染成 HTML，且组件代码不发送到浏览器。
+
+**关键点**：水合只对 Client Components 有意义，Server Components 不参与水合过程。
 
 ## 你需要记住的
 
