@@ -8,6 +8,7 @@
 
 ## 概念清单
 
+- [x] 1.0 组件化编程引入
 - [x] 1.1 React 组件与 JSX
 - [x] 1.2 Props（父子组件传值）
 - [x] 1.3 Hooks 基础（useState、useEffect）
@@ -20,6 +21,7 @@
 
 ## 教学文件
 
+- [x] [1.0 组件化编程引入](./00-component-introduction.md)
 - [x] [1.1 React 组件与 JSX](./01-react-jsx.md)
 - [x] [1.2 Props（父子组件传值）](./02-props.md)
 - [x] [1.3 Hooks 基础](./03-hooks.md)
