@@ -160,24 +160,64 @@ export default function UserList() {
 ## 项目结构
 
 ```text
-stages/                    # 7 个阶段的教学内容
-  stage-0-basics/           # 环境准备与最基础认知
-    00-basic-concepts.md    # 基础概念预热（命名规范、语法糖）
-    01-nodejs.md            # Node.js 运行时
-    02-package-manager.md   # 包管理器
-    03-vite.md              # 构建工具与 HMR
-    04-typescript.md        # TypeScript 基础
-    05-startup-flow.md      # 项目启动流程
-  stage-1-react/            # React 基础与组件思维
-  stage-2-nextjs-structure/ # Next.js 项目结构
-  stage-3-server-components/# Server Components
-  stage-4-server-actions/   # Server Actions
-  stage-5-database/         # 数据层与后端逻辑
-  stage-6-architecture/     # 架构进阶与生产考虑
-SYLLABUS.md                # 教学大纲（7 阶段概念清单）
-CONCEPTS.md                # 全局概念清单（概念闭环检查依据）
-CLAUDE.md                  # 项目说明
-.claude/skills/             # 自动生成教学内容的 skill
+README.md                  # 项目说明
+SYLLABUS.md                 # 教学大纲（7 阶段概念清单）
+CONCEPTS.md                 # 全局概念清单（概念闭环检查依据）
+
+0-环境准备/                   # 环境准备与最基础认知
+  00-基础概念预热.md
+  01-Node.js运行时.md
+  02-包管理器.md
+  03-构建工具与HMR.md
+  04-TypeScript基础.md
+  05-项目启动流程.md
+
+1-React基础/                 # React 基础与组件思维
+  00-组件化编程引入.md
+  01-React组件与JSX.md
+  02-Props父子组件传值.md
+  03-Hooks基础.md
+  04-组件通信与状态提升.md
+  05-React Router路由.md
+  06-懒加载与Suspense.md
+  07-Client Component交互.md
+  08-React渲染机制.md
+
+2-Next.js结构/               # Next.js 项目结构
+  01-App Router项目结构.md
+  02-核心文件作用.md
+  03-代码加载流程.md
+  04-Next.js vs Vite项目差异.md
+
+3-ServerComponents/          # Server Components
+  01-Server Components核心概念.md
+  02-Client Components.md
+  03-SC与CC协作规则.md
+  04-Server数据获取.md
+  05-三种数据获取方式对比.md
+
+4-ServerActions/             # Server Actions
+  01-Server Actions.md
+  02-表单处理与数据提交.md
+  03-Route Handlers API路由.md
+
+5-数据库/                    # 数据层与后端逻辑
+  00-数据库基础概念.md
+  01-数据库连接与server-only.md
+  02-环境变量与配置.md
+  03-Prisma ORM基础.md
+  04-CRUD操作在Next.js中的常见位置.md
+  05-zod数据验证.md
+  06-错误处理与安全性.md
+
+6-架构/                      # 架构进阶与生产考虑
+  01-Middleware与权限控制.md
+  02-认证系统.md
+  03-缓存与渲染策略.md
+  04-API设计与文档.md
+  05-文件上传与存储.md
+  06-部署方式与扩展思路.md
+  07-AI集成基础.md
 ```
 
 ---
