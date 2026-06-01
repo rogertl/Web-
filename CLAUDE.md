@@ -15,6 +15,15 @@ practice/        # 实践项目（后续创建）
 notes/           # 学习笔记
 ```
 
+## 教学流水线 Skill
+
+使用 `tutorial-pipeline` skill 自动生成教学内容：
+- **单阶段**：说"开始阶段 X"
+- **全量生成**：说"生成所有阶段"
+- **质量检查**：说"检查质量"
+
+Skill 路径：`.claude/skills/tutorial-pipeline/`
+
 ## 教学节奏
 
 - 每周重点攻克 1 个阶段

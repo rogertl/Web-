@@ -6,11 +6,11 @@
 
 ## 概念清单
 
-- [ ] 0.1 Node.js：什么是运行时，为什么需要它
-- [ ] 0.2 包管理器（npm / pnpm）与 package.json
-- [ ] 0.3 Vite：开发时的构建工具（热更新 HMR）
-- [ ] 0.4 TypeScript 基础：类型注解、interface、type
-- [ ] 0.5 项目启动流程（npm run dev 背后发生了什么）
+- [ ] [0.1 Node.js：什么是运行时](01-nodejs.md)
+- [ ] [0.2 包管理器与 package.json](02-package-manager.md)
+- [ ] [0.3 Vite：开发时的构建工具](03-vite.md)
+- [ ] [0.4 TypeScript 基础](04-typescript.md)
+- [ ] [0.5 项目启动流程](05-startup-flow.md)
 
 ## 实践
 
@@ -21,4 +21,4 @@
 
 ---
 
-> 内容将逐章生成，请说"开始阶段 0"启动学习。
+> 内容已生成。从 01-nodejs.md 开始阅读。
