@@ -65,14 +65,24 @@ function LoginForm() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    // e.preventDefault() 阻止表单默认提交行为（防止页面刷新）
     e.preventDefault();
-    setIsLoading(true);
 
-    // 模拟 API 调用
-    await login(email, password);
+    // 更新状态触发 UI 更新
+    setIsLoading(true);  // 按钮显示"提交中..."
 
-    setIsLoading(false);
+    try {
+      // 异步操作（如 API 调用）
+      await login(email, password);
+
+      // 登录成功后可以重定向或显示成功消息
+    } catch (error) {
+      console.error('登录失败:', error);
+    } finally {
+      // 恢复状态
+      setIsLoading(false); // 按钮恢复可点击
+    }
   };
 
   return (
@@ -96,6 +106,40 @@ function LoginForm() {
   );
 }
 ```
+
+**这段表单代码中的关键概念**：
+
+| 概念 | 说明 | 示例 |
+|------|------|------|
+| **React.FormEvent** | TypeScript 表单事件类型 | `e: React.FormEvent<HTMLFormElement>` |
+| **e.preventDefault()** | 阻止表单默认提交（防止页面刷新） | 在提交处理开始时调用 |
+| **setIsLoading(true)** | 更新状态，触发组件重新渲染 | 状态变化 → UI 立即响应 |
+| **await login()** | 等待异步操作完成 | 必须在 `async` 函数中使用 |
+| **try/catch/finally** | 错误处理和资源清理 | `finally` 中恢复加载状态 |
+| **e.target.value** | 获取输入框的当前值 | `onChange` 事件的目标元素 |
+| **disabled={isLoading}** | 根据状态禁用按钮 | 加载中时禁止重复提交 |
+| **value={email}** | 受控组件：值由状态决定 | 输入框显示 `email` 状态的值 |
+
+**什么是受控组件？**
+```tsx
+// 受控组件：值由 React 状态控制
+<input value={email} onChange={(e) => setEmail(e.target.value)} />
+// ↓
+// 用户输入 → onChange 触发 → setEmail 更新状态 → value 更新 → 显示新值
+
+// 非受控组件（不推荐）：值由 DOM 自己管理
+<input defaultValue={email} />
+```
+
+**表单处理的完整流程：**
+1. 用户输入 → `onChange` 事件触发 → `setEmail` 更新状态 → 输入框显示新值
+2. 用户提交 → `onSubmit` 事件触发 → `handleSubmit` 执行
+3. `e.preventDefault()` 阻止页面刷新
+4. `setIsLoading(true)` 更新状态 → 按钮变为"登录中..."
+5. `await login()` 执行异步操作
+6. `setIsLoading(false)` 恢复状态 → 按钮恢复可点击
+
+---
 
 ### useEffect：处理副作用
 
