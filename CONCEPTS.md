@@ -123,10 +123,10 @@
 
 | 概念 | 正式讲解 | 首次出现 | 状态 |
 |------|---------|---------|------|
-| Server Components | 3.1 | 0.1 | ⏳ |
-| Client Components | 3.2 | 0.5 | ⏳ |
-| SC 与 CC 协作规则 | 3.3 | — | ⏳ |
-| Server 数据获取 | 3.4 | — | ⏳ |
+| Server Components | 3.1 | 0.1 | ✅ |
+| Client Components | 3.2 | 0.5 | ✅ |
+| SC 与 CC 协作规则 | 3.3 | — | ✅ |
+| Server 数据获取 | 3.4 | — | ✅ |
 
 ## 阶段 4：Server Actions（待生成）
 
