@@ -57,6 +57,242 @@ function Toolbar() {
 - `color = 'blue'` 是默认值，父组件不传时使用
 - 父组件传递时用 `属性名={值}` 的语法
 
+#### Props 传递的括号规则
+
+在 JSX 中传递 props 时，括号的使用至关重要：
+
+| 传递的数据类型 | 写法 | 说明 |
+|-------------|------|------|
+| 字符串 | `title="Hello"` | 直接写，不用括号 |
+| 数字 | `count={42}` | 必须用 `{}` |
+| 布尔值 | `isActive={true}` | 必须用 `{}` |
+| 变量 | `name={userName}` | 必须用 `{}` |
+| 表达式 | `total={a + b}` | 必须用 `{}` |
+| 对象 | `user={{ name: "张三" }}` | 双层 `{{}}`：外层 JSX，内层对象 |
+| 数组 | `items={[1, 2, 3]}` | `[]` 本身就是 JS 语法 |
+| 函数 | `onClick={() => {}}` | 箭头函数必须用 `{}` |
+| null/undefined | `value={null}` | 必须用 `{}` |
+
+```tsx
+// ❌ 错误示例
+<Button text=textValue />          // 变量不用 {} 会当作字符串
+<Button count=42 />                // 数字不用 {} 会报错
+<Button style={color: "red"} />    // 对象不用外层 {} 会解析错误
+
+// ✅ 正确示例
+<Button text={textValue} />        // 变量必须用 {}
+<Button count={42} />              // 数字必须用 {}
+<Button style={{ color: "red" }} /> // 对象必须用 {{}}
+```
+
+**记忆口诀**：除了字符串字面量，其他所有值都必须用花括号 `{}` 包裹。
+
+---
+
+### children prop — 组件组合的核心
+
+`children` 是 React 中的特殊 prop，用于组件嵌套：
+
+```tsx
+// 1. 基础用法：接收子内容
+function Card({ children }) {
+  return (
+    <div className="card">
+      {children}  {/* 渲染父组件传入的子内容 */}
+    </div>
+  );
+}
+
+// 使用：标签之间的内容就是 children
+<Card>
+  <h2>标题</h2>
+  <p>内容</p>
+</Card>
+```
+
+```tsx
+// 2. children 作为函数（render props 模式）
+function DataFetcher({ url, children }) {
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    fetch(url).then(res => res.json()).then(setData);
+  }, [url]);
+
+  // children 是一个函数，接收 data 作为参数
+  return data ? children(data) : <div>Loading...</div>;
+}
+
+// 使用：传入函数作为 children
+<DataFetcher url="/api/user">
+  {(user) => (
+    <div>
+      <h1>{user.name}</h1>
+      <p>{user.email}</p>
+    </div>
+  )}
+</DataFetcher>
+```
+
+```tsx
+// 3. 多个插槽的组合模式
+function Layout({ header, sidebar, children, footer }) {
+  return (
+    <div className="layout">
+      <header>{header}</header>
+      <div className="body">
+        <aside>{sidebar}</aside>
+        <main>{children}</main>
+      </div>
+      <footer>{footer}</footer>
+    </div>
+  );
+}
+
+// 使用
+<Layout
+  header={<h1>网站标题</h1>}
+  sidebar={<nav>侧边栏</nav>}
+  footer={<p>页脚</p>}
+>
+  <main>主内容</main>
+</Layout>
+```
+
+**children 的关键点**：
+- `children` 是保留的 prop 名称，不用显式传递
+- 可以是任何 JSX 元素、文本、或组件
+- render props 模式：`children` 作为函数，让父组件控制渲染逻辑
+- 组合模式：多个命名插槽 + `children` 实现灵活布局
+
+---
+
+### props 对象本身的使用
+
+有时候不解构，直接使用 `props` 对象：
+
+```tsx
+// ❌ 不解构：代码冗长
+function Button(props) {
+  return (
+    <button
+      style={{ backgroundColor: props.color }}
+      onClick={() => alert(`Clicked: ${props.text}`)}
+    >
+      {props.text}
+    </button>
+  );
+}
+
+// ✅ 解构：简洁清晰
+function Button({ text, color = 'blue' }) {
+  return (
+    <button
+      style={{ backgroundColor: color }}
+      onClick={() => alert(`Clicked: ${text}`)}
+    >
+      {text}
+    </button>
+  );
+}
+```
+
+**何时使用 props 对象本身？**
+1. **转发所有 props 到子元素**
+```tsx
+function InputWrapper({ label, ...props }) {
+  return (
+    <div className="input-wrapper">
+      <label>{label}</label>
+      <input {...props} />  {/* 转发剩余的 props */}
+    </div>
+  );
+}
+
+// 使用
+<InputWrapper
+  label="用户名"
+  type="text"
+  placeholder="请输入用户名"
+  value={name}
+  onChange={handleChange}
+/>
+```
+
+2. **高阶组件或包装器**
+```tsx
+function withLoading(Component) {
+  return function WrappedComponent(props) {
+    // 直接转发 props，不解构
+    return <Component {...props} />;
+  };
+}
+```
+
+3. **render props 或动态组件**
+```tsx
+function FlexibleComponent({ component: Component, ...props }) {
+  // component 是变量，props 转发给它
+  return <Component {...props} />;
+}
+
+// 使用
+<FlexibleComponent component={Button} text="Click me" />
+<FlexibleComponent component={Link} href="/home">Home</FlexibleComponent>
+```
+
+---
+
+### render props 模式
+
+render props 是一种组件复用模式，通过函数 prop 传递渲染逻辑：
+
+```tsx
+// MouseTracker 组件：跟踪鼠标位置
+class MouseTracker extends React.Component {
+  state = { x: 0, y: 0 };
+
+  handleMouseMove = (e) => {
+    this.setState({ x: e.clientX, y: e.clientY });
+  };
+
+  render() {
+    // 把渲染逻辑通过 render 函数传递出去
+    return (
+      <div style={{ height: '100vh' }} onMouseMove={this.handleMouseMove}>
+        {this.props.render(this.state)}
+      </div>
+    );
+  }
+}
+
+// 使用：render 函数接收鼠标位置，返回要渲染的内容
+function App() {
+  return (
+    <MouseTracker
+      render={({ x, y }) => (
+        <div>
+          <h1>鼠标位置</h1>
+          <p>X: {x}, Y: {y}</p>
+        </div>
+      )}
+    />
+  );
+}
+
+// 也可以用 children 作为 render prop
+<MouseTracker>
+  {({ x, y }) => <p>鼠标在 ({x}, {y})</p>}
+</MouseTracker>
+```
+
+**render props 的优势**：
+- 组件可以复用逻辑（如鼠标跟踪、数据获取）
+- 使用者控制渲染内容
+- 比高阶组件更灵活、更直观
+
+---
+
 ### Props 的只读性
 
 Props 是只读的，子组件不能修改传入的 props：
@@ -547,6 +783,10 @@ function Dashboard() {
 - 展开语法 `{...obj}` 可传递多个 props
 - Props drilling 是多层级数据传递的基础方式
 - 良好的 props 设计让组件更可复用、更易组合
+- **Props 传递括号规则**：除了字符串，所有值都用 `{}` 包裹；对象用 `{{}}`
+- **children prop**：特殊 prop，用于组件嵌套和组合；可以是内容或函数
+- **render props 模式**：通过函数 prop 传递渲染逻辑，实现组件复用
+- **props 对象转发**：用 `{...props}` 转发剩余 props，或直接传递 props 对象
 
 ## AI 代码中的线索
 
@@ -556,25 +796,52 @@ function Dashboard() {
 // 1. 组件参数解构
 function Component({ prop1, prop2 }) {}
 
-// 2. 传递字符串
+// 2. 传递字符串（不用括号）
 <Card title="Hello" />
 
-// 3. 传递表达式（注意花括号）
+// 3. 传递表达式（用括号）
 <Card count={user.items.length} />
 
-// 4. 传递函数
+// 4. 传递函数（用括号）
 <Button onClick={handleSubmit} />
 
-// 5. 展开语法传递
+// 5. 展开语法传递（用括号）
 <User {...userData} />
 
-// 6. TypeScript props 类型
+// 6. 传递对象（双层括号）
+<UserCard user={{ name: "张三", age: 25 }} />
+
+// 7. TypeScript props 类型
 interface Props { name: string; }
 function Card({ name }: Props) {}
+
+// 8. children prop
+function Wrapper({ children }) {
+  return <div className="wrap">{children}</div>;
+}
+
+// 9. render props 模式
+<DataFetcher url="/api/data">
+  {(data) => <Display data={data} />}
+</DataFetcher>
+
+// 10. props 转发
+function Input({ label, ...props }) {
+  return <div><label>{label}</label><input {...props} /></div>;
+}
 ```
+
+**括号使用线索判断**：
+- 看到 `propName="string"` → 字符串字面量
+- 看到 `propName={value}` → 变量或表达式
+- 看到 `propName={{ key: value }}` → 对象（外层 JSX 表达式，内层对象）
+- 看到 `<Tag>content</Tag>` → children prop
 
 ## 验证问题
 
 - [ ] 为什么 Props 是只读的？如果子组件需要修改数据应该怎么做？
 - [ ] 在什么情况下应该使用 TypeScript 定义 Props 类型？
 - [ ] Props drilling 的问题是什么？你能否想到更好的数据传递方式？
+- [ ] 你能区分 `title="Hello"` 和 `title={title}` 的区别吗？
+- [ ] children prop 有哪几种使用方式？render props 模式的优势是什么？
+- [ ] 什么情况下应该不解构 props，而是使用 `props` 对象或 `{...props}` 转发？
