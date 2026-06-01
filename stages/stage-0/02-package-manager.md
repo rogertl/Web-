@@ -74,16 +74,85 @@ npm run build  →    找到 "build": "next build" → next build
 
 区分的意义：部署到生产环境时，可以只安装 `dependencies`，跳过 `devDependencies`，减少安装量和攻击面。
 
-### npm vs pnpm — 两个采购员
+### npm vs pnpm — 两个采购员的核心区别
+
+#### 1. 磁盘空间与链接机制
 
 | | npm | pnpm |
 |---|---|---|
-| 安装命令 | `npm install` | `pnpm install` |
-| 速度 | 较慢 | 更快 |
-| 磁盘占用 | 每个项目各存一份 | 全局共享，节省空间 |
-| 识别标志 | 生成 `package-lock.json` | 生成 `pnpm-lock.yaml` |
+| 存储方式 | 每个 `node_modules/` 都存一份完整副本 | 用硬链接指向全局缓存，磁盘只存一份 |
+| 典型项目大小 | 300-500 MB | 30-50 MB（10倍节省） |
+| 全局缓存 | 有（`~/.npm`），但每个项目仍复制 | 严格复用，`.pnpm/store` 是唯一真相源 |
+
+**本质区别**：npm 是"复制粘贴"，pnpm 是"快捷方式"。
+
+#### 2. 依赖解析与幽灵依赖（关键）
+
+**npm 的幽灵依赖问题**：
+```js
+// 项目只安装了 express
+npm install express
+
+// 但你可以引用 express 内部依赖的包
+import accepts from 'accepts'  // ← express 的依赖，但你没装！
+```
+
+这能工作是因为 npm 把所有依赖"拍平"在 `node_modules/` 根目录。问题是：一旦 express 升级、换版本，`accepts` 可能消失，你的代码突然挂掉。
+
+**pnpm 的严格隔离**：
+```js
+// 同样的场景
+pnpm install express
+
+import accepts from 'accepts'  // ← 直接报错：找不到模块
+```
+
+pnpm 用 `.pnpm/` 目录维持严格的依赖树，你只能引用 `package.json` 里声明的包。**这看似麻烦，但杜绝了隐式依赖**。
+
+#### 3. 速度
+
+| 场景 | npm | pnpm |
+|------|-----|------|
+| 重复安装同一版本 | 重新解析 + 下载 | 直接硬链接，毫秒级 |
+| 100 个项目装 lodash | 下载 100 次（缓存可能不命中） | 下载 1 次，硬链接 100 次 |
+
+#### 4. 命令差异
+
+| | npm | pnpm |
+|---|---|---|
+| 安装依赖 | `npm install` | `pnpm install` |
+| 运行脚本 | `npm run dev`（必须写 run） | `pnpm dev`（可省略 run） |
+| 添加包 | `npm add <包名>` | `pnpm add <包名>` |
+| lock 文件 | `package-lock.json` | `pnpm-lock.yaml` |
 
 AI 生成的项目两种都可能用。**看根目录下的 lock 文件就知道用的哪个**。
+
+### 什么时候用 npm，什么时候用 pnpm
+
+#### 用 npm 的场景
+
+| 场景 | 原因 |
+|------|------|
+| **学习/个人项目** | 文档多、Stack Overflow 答案多，出问题容易搜 |
+| **遗留项目** | 已有 `package-lock.json`，换工具收益不明显 |
+| **企业限制** | 内网策略可能只允许 npm |
+| **简单 CLI 工具** | 一次性用，全局安装一个包就行 |
+
+#### 用 pnpm 的场景
+
+| 场景 | 原因 |
+|------|------|
+| **多项目开发** | 共享依赖省空间省时间（本地 10 个项目 → 省几 GB） |
+| **CI/CD 环境** | 构建速度快，缓存命中率高 |
+| **Monorepo** | pnpm workspace 对多包项目管理更友好 |
+| **新项目/团队** | 从头开始，直接用现代工具链 |
+
+#### 学习建议
+
+**本教程用 pnpm**，但学习过程中**两个都要认识**：
+- AI 代码、教程、开源项目会混用
+- 读懂 lock 文件（`package-lock.json` vs `pnpm-lock.yaml`）就能知道项目用哪个
+- 底层原理相通，差别在实现细节
 
 ### pnpm install 做了什么
 

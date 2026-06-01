@@ -77,7 +77,7 @@ Next.js 是一个全栈框架（阶段 2 会详细讲），它的运行依赖 No
 | 环节 | Node.js 做什么 |
 |------|----------------|
 | 开发时 | 启动本地服务器、编译代码、热更新 |
-| 构建时 | 把 TypeScript 编译成 JavaScript、打包优化 |
+| 构建时 | 把 TypeScript（一种带类型的 JavaScript 超集，0.4 会详细讲）编译成 JavaScript、打包优化 |
 | 运行时 | 执行服务端代码（Server Components，阶段 3 会详细讲） |
 
 ## 你需要记住的

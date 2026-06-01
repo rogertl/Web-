@@ -111,7 +111,7 @@ type ID = number | string                         // 可以是多种类型
 // 1. 组件的 Props 类型（Props 是 React 组件接收参数的方式，阶段 1 会详细讲）
 interface ButtonProps {
   text: string
-  onClick: () => void           // 一个没有参数、没有返回值的函数
+  onClick: () => void           // 箭头函数语法（= function() {} 的简写），无参数无返回值
   variant?: 'primary' | 'secondary'
   disabled?: boolean
 }
@@ -122,10 +122,12 @@ const user: User | null = fetchUser()
 
 // 3. async 函数返回值
 async function getUsers(): Promise<User[]> {
-  //                    ↑ 异步函数，最终返回一个 User 数组
-  const res = await fetch('/api/users')  // fetch 是浏览器内置的请求函数
+  //                    ↑ async = 异步函数，内部可以用 await 等待耗时操作完成
+  const res = await fetch('/api/users')
+  //         ↑ await = 等待 fetch 请求完成后才继续执行（不阻塞其他代码）
   return res.json()
 }
+// async/await 是处理异步操作的语法糖，让异步代码读起来像同步代码一样直观
 
 // 4. 泛型 — 让类型也能"接收参数"
 // ApiResponse<T> 中的 T 是一个类型参数，使用时替换成具体类型
