@@ -7,7 +7,7 @@ Hooks 是 React 函数组件中处理状态和副作用的特殊函数。
 
 不理解 Hooks，当看到 AI 代码中组件内部有 `useState`、`useEffect` 等"魔法"调用时，你会完全迷失：这些函数从哪来？为什么组件一渲染就会执行？为什么 `u[...]
 
-Hooks 是现代 React 开发的核心。不掌握 useState 和 useEffect，就无法理解组件如何响应数据变化、如何��理副作用（API 调用、订阅等）。
+Hooks 是现代 React 开发的核心。不掌握 useState 和 useEffect，就无法理解组件如何响应数据变化、如何管理副作用（API 调用、订阅等）。
 
 ## 类比
 
@@ -54,6 +54,183 @@ function Counter() {
 - 解构赋值命名：`const [state, setState] = useState(initialValue)`
 - 调用 `setState` 会触发组件重新渲染
 - 初始值只在组件首次渲染时使用
+
+### useState 中变量的生命周期
+
+这是初学者最容易困惑的地方。让我用一个真实的例子来说明：
+
+```tsx
+function Counter() {
+  const [count, setCount] = useState(0);
+  
+  // 这个普通变量，每次组件渲染都会重新创建
+  const multiplied = count * 2;  // ❌ 每次渲染都是新对象
+  
+  console.log('Component rendered, multiplied =', multiplied);
+
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <p>Multiplied: {multiplied}</p>
+      <button onClick={() => setCount(count + 1)}>
+        Click me
+      </button>
+    </div>
+  );
+}
+```
+
+**完整的生命周期流程：**
+
+```
+【第一次渲染】
+1. 函数执行：Counter()
+2. useState(0) 被调用
+   └─ React 在内存中为这个组件实例创建一个"状态存储"，存储 count = 0
+3. const multiplied = count * 2  → multiplied = 0
+4. 组件返回 JSX，React 渲染到 DOM
+5. 控制台输出：'Component rendered, multiplied = 0'
+
+【用户点击按钮】
+6. onClick 触发 → setCount(1) 被调用
+7. React 更新内存中的状态：count = 1
+8. React **立即重新调用** Counter() 函数
+   └─ 之前的 multiplied 变量被丢弃
+
+【第二次渲染】
+9. 函数执行：Counter()（从头开始！）
+10. useState(0) 被调用
+    └─ React 不会再次初始化，而是从状态存储中返回最新值：count = 1
+    └─ const [count, setCount] = [1, setCount函数]
+11. const multiplied = count * 2  → multiplied = 2（新对象！）
+12. 组件返回 JSX，React 渲染到 DOM
+13. 控制台输出：'Component rendered, multiplied = 2'
+
+【继续点击...】
+14. 每次点击都重复 6-13 的流程
+```
+
+**关键理解点：**
+
+| 概念 | 生命周期 | 说明 |
+|------|---------|------|
+| **useState 状态变量** | 持久存储 | 在组件卸载前一直存活，跨越多次渲染 |
+| **普通变量** | 每次重建 | 组件每次渲染都会重新创建，前一个被销毁 |
+| **setState 函数** | 持久存储 | React 确保在整个生命周期中是同一个函数引用 |
+
+```tsx
+function Demo() {
+  const [count, setCount] = useState(0);
+  const temp = Math.random();  // 每次渲染都是不同的数字！
+  
+  // ✅ 这个 if 永远为 true，因为每次都是新对象
+  if (temp !== temp) {
+    console.log('不可能执行');
+  }
+
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <p>Random: {temp}</p>
+      <button onClick={() => setCount(count + 1)}>+1</button>
+    </div>
+  );
+}
+
+// 【第一次渲染】temp = 0.523
+// 【第二次渲染】temp = 0.841（完全不同的数字！前一个被销毁）
+// 【第三次渲染】temp = 0.276
+```
+
+**为什么这很重要？**
+
+1. **避免在组件函数体中创建引用类型**
+```tsx
+// ❌ 不好：每次渲染都创建新数组/对象
+function BadComponent() {
+  const [items, setItems] = useState([]);
+  const defaultOptions = { color: 'red' };  // 每次渲染都是新对象！
+  
+  // 如果在 useEffect 中使用 defaultOptions，会导致无限循环
+  useEffect(() => {
+    console.log('Options changed');
+  }, [defaultOptions]);  // 依赖总是在改变！
+}
+
+// ✅ 好：使用 useState 或 useCallback
+function GoodComponent() {
+  const [items, setItems] = useState([]);
+  
+  // 方式1：用 useState 存储
+  const [defaultOptions] = useState({ color: 'red' });
+  
+  // 方式2：用 useCallback（后续章节）
+  // const getOptions = useCallback(() => ({ color: 'red' }), []);
+  
+  useEffect(() => {
+    console.log('Options changed');
+  }, [defaultOptions]);  // 依赖保持不变
+}
+```
+
+2. **理解为什么状态更新会触发重新渲染**
+```tsx
+function Counter() {
+  const [count, setCount] = useState(0);
+
+  // 每次点击按钮：
+  // 1. setCount(count + 1) 被调用
+  // 2. React 更新内存中的状态值
+  // 3. React 重新调用整个 Counter 函数
+  // 4. useState(0) 返回最新的 count 值
+  // 5. 函数体的代码再执行一遍
+  // 6. UI 更新显示新的 count
+  
+  const handleClick = () => {
+    setCount(count + 1);
+    // 这里 count 仍然是旧值！新值在下一次渲染才会生效
+    console.log(count);  // 总是比点击的慢一步
+  };
+
+  return (
+    <div>
+      <p>{count}</p>
+      <button onClick={handleClick}>Click</button>
+    </div>
+  );
+}
+```
+
+3. **为什么 useEffect 的依赖数组很关键**
+```tsx
+function UserProfile({ userId }) {
+  const [user, setUser] = useState(null);
+
+  // ❌ 没有依赖数组：每次渲染都执行
+  useEffect(() => {
+    fetchUser(userId);  // API 被无限调用！
+  });
+
+  // ✅ 空依赖数组：只在首次渲染执行
+  useEffect(() => {
+    fetchUser(userId);
+  }, []);
+
+  // ✅ 依赖 userId：userId 变化时执行
+  useEffect(() => {
+    fetchUser(userId);
+  }, [userId]);
+}
+
+// 【第一次渲染】
+// - useEffect 执行 → 发起 API 请求
+// 
+// 【数据到达，调用 setUser】
+// - 触发第二次渲染
+// - useEffect 再次检查依赖
+//   - 如果没有依赖数组 → 再次发起 API 请求（无限循环！）
+//   - 如果依赖 userId 且 userId 没变 → 不执行
+```
 
 ### useState 的使用场景
 
@@ -339,6 +516,7 @@ function GoodExample() {
 ## 你需要记住的
 
 - `useState` 返回 `[状态值, 更新函数]`，状态变化触发重新渲染
+- **useState 的状态是持久的**，但普通变量在每次渲染都会重新创建
 - `useEffect` 在渲染**之后**执行副作用（API 调用、订阅等）
 - useEffect 的依赖数组控制何时重新执行
 - useEffect 可以返回清理函数，用于解除副作用
@@ -378,3 +556,4 @@ const [loading, setLoading] = useState(false);
 - [ ] useEffect 的依赖数组为空 `[]` 和有依赖 `[count]` 有什么区别？
 - [ ] 为什么 Hooks 必须在函数顶层调用，不能在条件语句中使用？
 - [ ] 组件首次渲染到显示 "Loading..."，然后数据到达会经历什么过程？
+- [ ] useState 中的状态变量和普通变量的生命周期有什么区别？
